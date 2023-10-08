@@ -105,45 +105,7 @@ app.get('/number-comparision', async (req, res) => {
     }
 })
 
-app.get('/get-single-user', async (req, res) => {
-    let { age, first_name } = req.query;
-    console.log(req.query)
-    try {
-        // find by id 
-        // const resData = await User.findByPk(id);
 
-        // find by text 
-        // const resData = await User.findAll({
-        //     where: {
-        //         age: age,
-        //         first_name: {
-        //             [Op.like]: `%${first_name}%`
-        //         }
-        //     }
-        // });
-
-        // get spesific fields with or operator
-        const resData = await User.findAll({
-            attributes: ["first_name", "age"],
-            where: {
-                [Op.or]: [
-                    { age: age },
-                    {
-                        first_name: {
-                            [Op.like]: `%${first_name}%`
-                        }
-                    }
-                ]
-            }
-        });
-
-        res.json(resData)
-    } catch (error) {
-        // Handle the Sequelize error and send it as a response to the client
-        res.status(500).json({ error: error.message });
-    }
-
-})
 
 app.delete('/delete-user', async (req, res) => {
     let { id } = req.query;
