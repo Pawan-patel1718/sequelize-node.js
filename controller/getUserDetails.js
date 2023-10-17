@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { User } = require('../models');
 const { getFullImageUrl, getFullImageUrlArray } = require('../reuseables/getFullImageUrl');
-const baseUrl = 'http://localhost:8000/';
+const baseUrl = process.env.baseUrl;
 
 const getUserDetails = async (req, res) => {
 
@@ -38,14 +38,14 @@ const getUserDetails = async (req, res) => {
                     }
                 ]
             }
-        });
+        }); ``
 
         let resData = getFullImageUrlArray(userList)
 
         res.json(resData)
     } catch (error) {
         // Handle the Sequelize error and send it as a response to the client
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error });
     }
 }
 

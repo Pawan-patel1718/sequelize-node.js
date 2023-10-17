@@ -1,4 +1,4 @@
-const baseUrl = 'http://localhost:8000/';
+const baseUrl = process.env.baseUrl;
 
 function getFullImageUrlArray(userList) {
   return userList.map((user) => {

@@ -2,11 +2,13 @@ const express = require('express')
 const app = express()
 const port = process.env.port || 8000;
 const bodyParser = require('body-parser');
+const dotenv = require("dotenv")
 const db = require("./models");
-const { User } = require('./models');
+const { User, Post } = require('./models');
 const { Op } = require('sequelize');
 var multer = require('multer');
 const upload = require("./middleware/upload")
+dotenv.config()
 // var upload = multer({ dest: "uploads/" });
 //Configuration for Multer
 // const storage = multer.diskStorage({
@@ -35,11 +37,43 @@ app.use(upload.array("files"));
 app.use('/uploads', express.static('uploads'))
 
 const user_route = require("./routes/UserRoute");
+const post = require("./routes/PostRoute");
+const { getFullImageUrlArray } = require('./reuseables/getFullImageUrl');
 
 app.get('/', async (req, res) => {
     try {
-        const jane = await User.findAll();
-        res.json(jane)
+        const jane = await User.findAll({
+            attributes: ["user_id", "first_name", "age", "profile_image"]
+            ,
+            include: [ // use an array to relate to multiple tables
+                {
+                    model: Post,
+                    attributes: ["postName", "title", "post_image"]
+                },
+            ],
+        });
+        let post_image = getFullImageUrlArray(jane)
+        res.json(post_image)
+    } catch (error) {
+        // Handle the Sequelize error and send it as a response to the client
+        res.status(500).json({ error: error.message });
+    }
+})
+
+app.get('/get-all-post', async (req, res) => {
+    try {
+        const jane = await Post.findAll({
+            attributes: ["postName", "title", "post_image"]
+            ,
+            include: [ // use an array to relate to multiple tables
+                {
+                    model: User,
+                    attributes: ["user_id", "first_name", "age", "profile_image"]
+                },
+            ],
+        });
+        let post_image = getFullImageUrlArray(jane)
+        res.json(post_image)
     } catch (error) {
         // Handle the Sequelize error and send it as a response to the client
         res.status(500).json({ error: error.message });
@@ -58,6 +92,7 @@ app.get('/', async (req, res) => {
 //     }
 // });
 app.use("/user", user_route)
+app.use("/post", post)
 
 // findAndCountAll
 app.post('/get-the-count', async (req, res) => {
@@ -125,8 +160,8 @@ app.delete('/delete-user', async (req, res) => {
     }
 })
 
-db.sequelize.sync().then(() => {
-    console.log('Database synced and tables created!')
+db.sequelize.sync({ alert: true }).then(() => {
+    console.log('Database Connected ✅!')
     app.listen(port, () => {
         console.log(`Example app listening on port ${port}!`)
     })
